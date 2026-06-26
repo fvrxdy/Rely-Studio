@@ -2720,9 +2720,10 @@ JSON: {"text":"isi caption dengan \\n antar paragraf","hashtags":["#RelyConsulti
 
 // ─── Calendar Page ────────────────────────────────────────────────────────────
 
-function CalendarPage({ library, onSchedule, addToast }: {
+function CalendarPage({ library, onSchedule, onUnschedule, addToast }: {
   library: ContentItem[];
   onSchedule: (id: string, date: string) => void;
+  onUnschedule: (id: string) => void;
   addToast: (msg: string) => void;
 }) {
   const today = new Date();
@@ -2924,7 +2925,22 @@ function CalendarPage({ library, onSchedule, addToast }: {
                         <p className="text-xs font-semibold truncate" style={{ color: "#F0F6FF" }}>{item.topic}</p>
                         <p className="text-xs mt-0.5" style={{ color: "#4A6FA5" }}>{item.format} · {item.tone}</p>
                       </div>
-                      <StatusBadge status={item.status} />
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <StatusBadge status={item.status} />
+                        <button
+                          onClick={() => { onUnschedule(item.id); addToast("Jadwal dibatalkan"); }}
+                          title="Batalkan jadwal"
+                          className="cursor-pointer rounded-lg p-1 transition-all"
+                          style={{
+                            background: "rgba(239,68,68,0.1)",
+                            border: "1px solid rgba(239,68,68,0.25)",
+                            color: "#F87171",
+                            display: "flex", alignItems: "center",
+                          }}
+                        >
+                          <X size={12} strokeWidth={2.5} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -4139,6 +4155,13 @@ export default function App() {
     await supabase.from("content_library").update({ scheduled_date: date, status: "Scheduled" }).eq("id", id);
   }
 
+  async function unscheduleContent(id: string) {
+    setLibrary((prev) => prev.map((item) =>
+      item.id === id ? { ...item, scheduledDate: undefined, status: "Draft" } : item
+    ));
+    await supabase.from("content_library").update({ scheduled_date: null, status: "Draft" }).eq("id", id);
+  }
+
   async function updateStatus(id: string, status: Status) {
     setLibrary((prev) => {
       const exists = prev.find((item) => item.id === id);
@@ -4179,7 +4202,7 @@ export default function App() {
             <GeneratePage onAddToLibrary={addToLibrary} addToast={addToast} />
           )}
           {page === "calendar" && (
-            <CalendarPage library={library} onSchedule={scheduleContent} addToast={addToast} />
+            <CalendarPage library={library} onSchedule={scheduleContent} onUnschedule={unscheduleContent} addToast={addToast} />
           )}
           {page === "library" && (
             <LibraryPage
