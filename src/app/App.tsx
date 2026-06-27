@@ -1824,7 +1824,7 @@ function TextareaField({ label, value, onChange, placeholder, rows = 4 }: {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-function Sidebar({ current, onNavigate }: { current: Page; onNavigate: (p: Page) => void }) {
+function Sidebar({ current, onNavigate, onLogout }: { current: Page; onNavigate: (p: Page) => void; onLogout: () => void }) {
   const nav: { page: Page; label: string; icon: React.ReactNode }[] = [
     { page: "generate", label: "Generate Content", icon: <Sparkles size={18} /> },
     { page: "calendar", label: "Content Calendar", icon: <CalendarDays size={18} /> },
@@ -1888,11 +1888,38 @@ function Sidebar({ current, onNavigate }: { current: Page; onNavigate: (p: Page)
         </nav>
       </div>
 
-      <div className="px-6 py-4 mt-auto">
-        <div className="text-xs" style={{ color: "#4A6FA5", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="px-4 py-4 mt-auto" style={{ borderTop: "1px solid rgba(96,165,250,0.08)" }}>
+        <div className="text-xs mb-3 px-2" style={{ color: "#4A6FA5", fontFamily: "'DM Sans', sans-serif" }}>
           Rely Consulting Group<br />
           <span style={{ color: "#2A4A7F" }}>Digital Marketing Team</span>
         </div>
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+          style={{
+            background: "transparent",
+            color: "#94B4D4",
+            border: "1px solid rgba(96,165,250,0.1)",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+            e.currentTarget.style.color = "#FCA5A5";
+            e.currentTarget.style.borderColor = "rgba(239,68,68,0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "#94B4D4";
+            e.currentTarget.style.borderColor = "rgba(96,165,250,0.1)";
+          }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
       </div>
     </aside>
   );
@@ -4074,6 +4101,240 @@ function DesignerWorkspacePage({ addToast, onNavigateLibrary, library, designTas
   );
 }
 
+// ─── Login Page ───────────────────────────────────────────────────────────────
+
+function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError("Email atau password salah. Silakan coba lagi.");
+    } else {
+      onLogin();
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #0A1628 0%, #0D2951 50%, #1A3A6B 100%)",
+        fontFamily: "'DM Sans', sans-serif",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background orbs */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+        <div style={{
+          position: "absolute", borderRadius: "50%",
+          width: 600, height: 600, top: -200, right: -200,
+          background: "radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)",
+          filter: "blur(40px)",
+        }} />
+        <div style={{
+          position: "absolute", borderRadius: "50%",
+          width: 400, height: 400, bottom: -100, left: -100,
+          background: "radial-gradient(circle, rgba(26,79,191,0.12) 0%, transparent 70%)",
+          filter: "blur(40px)",
+        }} />
+        <div style={{
+          position: "absolute", borderRadius: "50%",
+          width: 300, height: 300, top: "40%", left: "35%",
+          background: "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)",
+          filter: "blur(60px)",
+        }} />
+      </div>
+
+      {/* Card */}
+      <div style={{
+        position: "relative", zIndex: 1,
+        width: "100%", maxWidth: 420,
+        margin: "0 16px",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(96,165,250,0.18)",
+        borderRadius: 24,
+        backdropFilter: "blur(24px)",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+        padding: "40px 36px 36px",
+      }}>
+        {/* Logo / Brand */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 56, height: 56, borderRadius: 16, marginBottom: 16,
+            background: "linear-gradient(135deg, #1A4FBF, #2563EB)",
+            boxShadow: "0 0 32px rgba(37,99,235,0.35)",
+          }}>
+            <Sparkles size={26} color="#F0F6FF" strokeWidth={2} />
+          </div>
+          <h1 style={{
+            margin: 0, fontSize: 22, fontWeight: 700,
+            color: "#F0F6FF", letterSpacing: "-0.3px",
+          }}>
+            Rely Content Studio
+          </h1>
+          <p style={{ margin: "6px 0 0", fontSize: 13, color: "rgba(176,210,255,0.6)" }}>
+            Masuk untuk melanjutkan
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Email */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "rgba(176,210,255,0.7)", letterSpacing: "0.5px" }}>
+              EMAIL
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Masukkan email"
+              required
+              autoComplete="email"
+              style={{
+                padding: "12px 14px",
+                borderRadius: 12,
+                border: "1px solid rgba(96,165,250,0.2)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#F0F6FF",
+                fontSize: 14,
+                outline: "none",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(96,165,250,0.5)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(96,165,250,0.2)"; }}
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "rgba(176,210,255,0.7)", letterSpacing: "0.5px" }}>
+              PASSWORD
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Masukkan password"
+                required
+                autoComplete="current-password"
+                style={{
+                  width: "100%",
+                  padding: "12px 42px 12px 14px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(96,165,250,0.2)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "#F0F6FF",
+                  fontSize: 14,
+                  outline: "none",
+                  boxSizing: "border-box",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(96,165,250,0.5)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(96,165,250,0.2)"; }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                style={{
+                  position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "rgba(176,210,255,0.5)", padding: 0, lineHeight: 1,
+                }}
+              >
+                {showPassword ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div style={{
+              padding: "10px 14px", borderRadius: 10,
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#FCA5A5", fontSize: 13,
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <X size={14} strokeWidth={2.5} />
+              {error}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              marginTop: 4,
+              padding: "13px",
+              borderRadius: 12,
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer",
+              background: loading
+                ? "rgba(37,99,235,0.4)"
+                : "linear-gradient(135deg, #1A4FBF, #2563EB)",
+              color: "#F0F6FF",
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "0.2px",
+              boxShadow: loading ? "none" : "0 0 24px rgba(37,99,235,0.35)",
+              transition: "all 0.2s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            {loading ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "spin 1s linear infinite" }}>
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Masuk...
+              </>
+            ) : (
+              "Masuk"
+            )}
+          </button>
+        </form>
+
+        <p style={{ textAlign: "center", marginTop: 24, fontSize: 12, color: "rgba(176,210,255,0.35)" }}>
+          © {new Date().getFullYear()} Rely Consulting Group
+        </p>
+      </div>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        input::placeholder { color: rgba(176,210,255,0.3); }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── App Shell ────────────────────────────────────────────────────────────────
 
 function rowToItem(row: any): ContentItem {
@@ -4112,8 +4373,23 @@ export default function App() {
   const [loadingLibrary, setLoadingLibrary] = useState(true);
   const [designTasks, setDesignTasks] = useState<DesignTask[]>(INITIAL_DESIGN_TASKS);
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
+  const [session, setSession] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // ── Auth: check session on mount & listen for changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
+    if (!session) return;
     async function fetchLibrary() {
       setLoadingLibrary(true);
       const { data, error } = await supabase
@@ -4126,7 +4402,7 @@ export default function App() {
       setLoadingLibrary(false);
     }
     fetchLibrary();
-  }, []);
+  }, [session]);
 
   function addToast(message: string) {
     const id = Date.now().toString();
@@ -4136,6 +4412,12 @@ export default function App() {
 
   function removeToast(id: string) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setSession(null);
+    setLibrary([]);
   }
 
   async function addToLibrary(item: ContentItem) {
@@ -4176,7 +4458,35 @@ export default function App() {
     await supabase.from("content_library").update(itemToRow(updated)).eq("id", updated.id);
   }
 
-  return (
+  // ── Loading auth state
+  if (authLoading) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        background: "linear-gradient(135deg, #0A1628 0%, #0D2951 50%, #1A3A6B 100%)",
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: "linear-gradient(135deg, #1A4FBF, #2563EB)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 0 24px rgba(37,99,235,0.3)",
+          }}>
+            <Sparkles size={22} color="#F0F6FF" />
+          </div>
+          <p style={{ color: "rgba(176,210,255,0.5)", fontSize: 13 }}>Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Show login if not authenticated
+  if (!session) {
+    return <LoginPage onLogin={() => {}} />;
+  }
+
+    return (
     <div
       className="flex h-screen w-full overflow-hidden"
       style={{
@@ -4195,7 +4505,7 @@ export default function App() {
       </div>
 
       <div className="relative flex w-full h-full" style={{ zIndex: 1 }}>
-        <Sidebar current={page} onNavigate={setPage} />
+        <Sidebar current={page} onNavigate={setPage} onLogout={handleLogout} />
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {page === "generate" && (
